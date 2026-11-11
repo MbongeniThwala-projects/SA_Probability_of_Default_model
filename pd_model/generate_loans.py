@@ -74,6 +74,17 @@ def generate_static_loans(rng):
     # TODO: "write" the dataframe frame
     return pd.DataFrame({
         "loan_id": [f"L{i:06d}" for i in range(1, n + 1)],
+        "origination_month": origination_month,
+        "product": product,
+        "province": province,
+        "age": age,
+        "employment_status": employment,
+        "monthly_income": monthly_income,
+        "bureau_score": bureau_score,
+        "loan_amount": loan_amount.round(0),
+        "term_months": term,
+        "interest_rate": annual_rate.round(2),
+        "payment_to_income": (instalment / monthly_income).round(3)
     })
 
 def _static_risk(loans):
