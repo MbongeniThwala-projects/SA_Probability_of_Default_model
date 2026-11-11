@@ -94,7 +94,7 @@ def _static_risk(loans):
         + 3.0 * (loans["payment_to_income"].to_numpy() - 0.20)
         - 0.02 * (loans["age"].to_numpy() -37)
         + loans["employment_status"].map(EMPLOYMENT_RISK).to_numpy()
-        + loans["products"].map(PRODUCT_RISK).to_numpy()
+        + loans["product"].map(PRODUCT_RISK).to_numpy()
     )
     
 def simulate_performance(loans, rng):
@@ -129,7 +129,7 @@ def simulate_performance(loans, rng):
             + .6 * np.exp(-(((mob[active] - 14) / 10) ** 2))            #risk peaks around month 14
         )
         p_miss = _sigmoid(BASE_LOGIT + risk)            #performing -> 30 days late
-        p_roll_30 = sigmoid(-1.5 + 0.5 * risk)          #30 to 60 days late
+        p_roll_30 = _sigmoid(-1.5 + 0.5 * risk)          #30 to 60 days late
         p_roll_60 = _sigmoid(-.5 + .5 * risk)           # 60 -> 90 days late (default)
 
         draw = rng.random(active.size)
