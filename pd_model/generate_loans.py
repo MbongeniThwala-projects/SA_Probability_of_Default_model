@@ -143,3 +143,30 @@ def simulate_performance(loans, rng):
         }))
 
         defaulted = new >= config.DEFAULT_DPD_THRESHOLD
+        matured = mob[active] >= term[active]
+        prepaid = (new == 0) & (rng.random(active.size) < prepay_prob[active])
+        closed[active[defaulted | matured | prepaid]] = True
+
+    return pd.concat(frames, ignore_index=True)
+
+def _print_summary(loans, performance):
+    ever_default = performance.groupby("loan_id")["days_past_due"].max() >= config.DEFAULT_DPD_THRESHOLD
+    print(f'Loans: {len(loans):,}')
+    print(f"Performance rows: {len(performance):,}")
+    print(f"Share of loans that ever reach {config.DEFAULT_DPD_THRESHOLD}+ DPD: {ever_default.mean():.1%}")
+    print(performance["days_past_due"].value_counts(normalize=True).sort_index().round(4))
+
+def main():
+    rng = np.random.default_rng(config.RANDOM_SEED)
+    loans = generate_static_loans(rng)
+    performance = simulate_performance(loans, rng)
+
+    config.RAW_DIR.mkdir(parents=True, exist_ok=True)
+    loans.to_parquet(config.LOANS_PATH, index=False)
+    performance.to_parquet(config.PERFORMANCE_PATH, index=False)
+    _print_summary(loans, performance)
+
+    # TODO: edge cases, loans that default in their first months, loans closed before the window ends
+
+if __name__ == "__main__":
+    main()
