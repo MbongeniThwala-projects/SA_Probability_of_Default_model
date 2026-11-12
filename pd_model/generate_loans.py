@@ -177,7 +177,6 @@ def main():
     performance.to_parquet(config.PERFORMANCE_PATH, index=False)
     _print_summary(loans, performance)
 
-    # TODO: edge cases, loans that default in their first months, loans closed before the window ends
 
 if __name__ == "__main__":
     main()

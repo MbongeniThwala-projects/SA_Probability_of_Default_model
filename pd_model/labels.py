@@ -5,7 +5,7 @@ from pd_model import config
 
 def build_labels(
     performance,
-    observatioin_points=config.OBSERVATION_POINTS,
+    observation_points=config.OBSERVATION_POINTS,
     window_months=config.PERFORMANCE_WINDOW_MONTHS,
     default_threshold=config.DEFAULT_DPD_THRESHOLD,
     min_months_on_book=config.MIN_MONTHS_ON_BOOK
@@ -14,14 +14,14 @@ def build_labels(
     if performance.duplicated(["loan_id", "snapshot_month"]).any():
         raise ValueError("performance has duplicates (loan_idm snapshot_month) rows")
 
-    points = pd.to_datetime(list(observatioin_points))
+    points = pd.to_datetime(list(observation_points))
 
     """
     The window must be fully observed, otherwise a loan that would have defaulted next month looks
     like a safe loan, and the model learns the wrong lessons 
     """
     data_end = performance["snapshot_month"].max()
-    latest_allowed = data_end - pd.DataOffset(months=int(window_months))
+    latest_allowed = data_end - pd.DateOffset(months=int(window_months))
     too_late = [p.date().isoformat() for p in points if p > latest_allowed]
     if too_late:
         raise ValueError(
@@ -35,7 +35,7 @@ def build_labels(
 
     con = duckdb.connect()
     con.register("performance", performance)
-    con.register("obs_points", pd.DataFrame({"observatioin_month": points}))
+    con.register("obs_points", pd.DataFrame({"observation_month": points}))
 
     sql = f"""
         SELECT
@@ -44,7 +44,7 @@ def build_labels(
             o.months_on_book,
             o.days_past_due AS dpd_at_observation,
             o.outstanding_balance,
-            MAX(CASE WHEN f.days_past_due >= {threshold} THEN 1 ELSE 0 END) AS default
+            MAX(CASE WHEN f.days_past_due >= {threshold} THEN 1 ELSE 0 END) AS default_flag
         FROM performance AS o
         JOIN obs_points AS op
             ON o.snapshot_month = op.observation_month
