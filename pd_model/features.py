@@ -18,12 +18,13 @@ def build_features(labels, performance, lookback_months=config.LOOKBACK_MONTHS):
             CAST(SUM(CASE WHEN h.days_past_due > 0
                             AND h.snapshot_month > l.observation_month - to_months({lookback})
                             THEN 1 ELSE 0 END) AS INTEGER)      AS arrears_months_recent,
-            COALESCE(MAX(CASE WHEN h.snapshot_month > l.observatioin_month - to_months({lookback})
+            COALESCE(MAX(CASE WHEN h.snapshot_month > l.observation_month - to_months({lookback})
                             THEN h.days_past_due END), 0)       AS max_dpd_recent,
-            CAST(SUM(CASE WHEN h.days_past_due > 0 THEN 1 ELSE 0 END) AS INTEGER)       AS arrears_months_total
+            CAST(SUM(CASE WHEN h.days_past_due > 0 THEN 1 ELSE 0 END) AS INTEGER)       AS arrears_months_total,
+            MAx(CASE WHEN h.snapshot_month = l.observation_month THEN 1 ELSE 0 END)     AS has_observation_row
         FROM labels AS l
         JOIN performance AS h
-          ON h.laon_id = l.loan_id
+          ON h.loan_id = l.loan_id
           AND h.snapshot_month <= l.observation_month
         GROUP BY l.loan_id, l.observation_month
     """
@@ -31,10 +32,11 @@ def build_features(labels, performance, lookback_months=config.LOOKBACK_MONTHS):
     con.close()
 
     #fail if any rows disappear because the the JOIN 
-    if len(history) != len(labels):
+    if len(history) != len(labels) or not history["has_observation_row"].all():
         raise ValueError(
-            f"{len(labels) - len(history)} label rows have no performance history at their observatioin month"
+            "some label rows have no performance history at their observatioin month"
         )
+    history = history.drop(columns="has_observation_row")
     #TODO: join static loan attributes -> age, bureau_score, employment_status...) and add the balance
     return labels.merge(
         history, 
