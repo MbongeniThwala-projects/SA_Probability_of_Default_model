@@ -14,6 +14,7 @@ PERFORMANCE_PATH = RAW_DIR / "loan_performance.parquet"
 PROCESSED_DIR = ROOT_DIR / "data" / "processed"
 LABELS_PATH = PROCESSED_DIR / "labels.parquet"
 FEARURES_PATH = PROCESSED_DIR / "features.parquet"
+MODEL_TABLE_PATH = PROCESSED_DIR / "model_table.parquet"
 
 # Problem definition
 DEFAULT_DPD_THRESHOLD = 90          # DAYS past due that counts as default (basel convent)
@@ -21,7 +22,10 @@ PERFORMANCE_WINDOW_MONTHS = 12      #how long after an obsevation point we watch
 MIN_MONTHS_ON_BOOK = 3              # a loan needs a few months before we can score it
 OBSERVATION_POINTS = [f"{year}-12-01" for year in range(2019, 2025)]
 LOOKBACK_MONTHS = 6                 #for recent arrears window; the observation month + the 5 months before
-# TODO train_test_split
+
+TRAIN_POINTS = ["2019-12-01", "2020-12-01", "2021-12-01", "2022-12-01"]
+VALIDATION_POINTS = ["2023-12-01"]
+TEST_POINTS = ["2024-12-01"]
 
 
 # synthetic data settings
