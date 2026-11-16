@@ -68,7 +68,7 @@ def main():
     features = build_features(labels, performance)
     features = add_static_features(features, loans)
 
-    features.to_parquet(config.FEARURES_PATH, index=False)
+    features.to_parquet(config.FEATURES_PATH, index=False)
 
     summary = features.groupby("arrears_months_recent")["default_flag"].agg(rows="size", bad_rate="mean")
     summary["bad_rate"] = summary["bad_rate"].round(4)

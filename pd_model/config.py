@@ -13,7 +13,7 @@ LOANS_PATH = RAW_DIR / "loans_static.parquet"
 PERFORMANCE_PATH = RAW_DIR / "loan_performance.parquet"
 PROCESSED_DIR = ROOT_DIR / "data" / "processed"
 LABELS_PATH = PROCESSED_DIR / "labels.parquet"
-FEARURES_PATH = PROCESSED_DIR / "features.parquet"
+FEATURES_PATH = PROCESSED_DIR / "features.parquet"
 MODEL_TABLE_PATH = PROCESSED_DIR / "model_table.parquet"
 
 # Problem definition

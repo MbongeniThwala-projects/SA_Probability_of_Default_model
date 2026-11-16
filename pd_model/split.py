@@ -48,7 +48,7 @@ def assign_split(
     return out
 
 def main():
-    table = pd.read_parquet(config.FEARURES_PATH)
+    table = pd.read_parquet(config.FEATURES_PATH)
     table = assign_split(
         table, config.TRAIN_POINTS, config.VALIDATION_POINTS, config.TEST_POINTS
     )
@@ -67,7 +67,7 @@ def main():
     train_loans = set(table.loc[table["split"] == "train", "loan_id"])
     for name in ["validation", "test"]:
         part = table[table["split"] == name]
-        share = part["loan_id"].isna(train_loans).mean()
+        share = part["loan_id"].isin(train_loans).mean()
         print(f"{name}: {share:.1%} of rows belong to loans that also appear in train")
 
     #TODO binning, scaling and encoders
