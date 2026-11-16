@@ -41,3 +41,6 @@ def test_signal_has_high_iv_and_noice_has_low_iv():
     noise = rng.normal(size=n)
     y = pd.Series((rng.random(n) < 1 / (1 + np.exp(-(2 * signal - 2)))).astype(int))
     X = pd.DataFrame({'signal': signal, 'noise': noise})
+    binner = WoEBinner().fit(X, y, numeric=["signal", "noise"], categorical=[])
+    assert binner.iv_["signal"] > .5
+    assert binner.iv_["noise"] < .02
