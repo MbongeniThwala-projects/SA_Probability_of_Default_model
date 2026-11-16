@@ -9,7 +9,7 @@ from pathlib import Path
 # Paths
 ROOT_DIR = Path(__file__).resolve().parents[1]
 RAW_DIR = ROOT_DIR / "data" / "raw"
-LOANS_PATH = RAW_DIR / "loan_performance.parquet"
+LOANS_PATH = RAW_DIR / "loans_static.parquet"
 PERFORMANCE_PATH = RAW_DIR / "loan_performance.parquet"
 PROCESSED_DIR = ROOT_DIR / "data" / "processed"
 LABELS_PATH = PROCESSED_DIR / "labels.parquet"

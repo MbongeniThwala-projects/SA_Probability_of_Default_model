@@ -25,7 +25,7 @@ def test_input_table_not_modified():
 
 def test_month_in_two_splits_raises():
     with pytest.raises(ValueError, match="more than one"):
-        assign_split(table(*TRIAN, *TEST), TRAIN, ["2021-12-01"], TEST, window_months=12)
+        assign_split(table(*TRAIN, *TEST), TRAIN, ["2021-12-01"], TEST, window_months=12)
 
 def test_wrong_time_order_raises():
     with pytest.raises(ValueError, match="time order"):
@@ -38,13 +38,13 @@ def test_overlapping_outcome_windows_raise():
     #Training's last window (Dec 2020 to Dec 2021) runs past a Jun 2021 validation month
     with pytest.raises(ValueError, match="window"):
         assign_split(
-            table("2020-12-01", "2021-12-01", "2022-12-01"),
-            ["2020-12-01"], ["2021-12-01"], ["2022-12-01"], window_months=12
+            table("2020-12-01", "2021-06-01", "2022-12-01"),
+            ["2020-12-01"], ["2021-06-01"], ["2022-12-01"], window_months=12
         )
 
 def test_unassigned_month_raises():
     with pytest.raises(ValueError, match="not assigned"):
-        assign_split(table(*TRAIN, *VALM *TEST, "2024-12-01"), TRAIN, VAL, TEST, window_months=12)
+        assign_split(table(*TRAIN, *VAL, *TEST, "2024-12-01"), TRAIN, VAL, TEST, window_months=12)
 
 def test_empty_split_raises():
     with pytest.raises(ValueError, match="no observation points"):

@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from pd_model.features import build_features
+from pd_model.features import build_features, STATIC_COLUMNS, add_static_features
 
 def perf(loan_id, start, dpds):
     months = pd.date_range(start, periods=len(dpds), freq="MS")
@@ -46,3 +46,40 @@ def test_obsrevation_without_performance_row_raises():
     history = perf("A", "2020-01-01", [0, 0, 0])        # nothing in Sep 2020
     with pytest.raises(ValueError):
         build_features(keys("A", "2020-09-01"), history, lookback_months=3)
+
+def one_loan_row(loan_id="A"):
+    return pd.DataFrame({
+        "loan_id": [loan_id],
+        "observation_month": pd.to_datetime(["2020-06-01"]),
+        "months_on_book": [10],
+        "outstanding_balance": [5000.0]
+    })
+
+def loans_table(*loan_ids):
+    return pd.DataFrame({
+        "loan_id": list(loan_ids),
+        "product": "personal_loan",
+        "province": "Gauteng",
+        "age": 35,
+        "employment_status": "permanent",
+        "monthly_income": 20_000.0,
+        "bureau_score": 640,
+        "loan_amount": 20_000, 
+        "term_months": 36,
+        "interest_rate": 15.0,
+        "payment_to_income": 0.15
+    })
+
+def test_static_features_joined_and_ratios_computed():
+    out = add_static_features(one_loan_row(), loans_table("A"))
+    assert out.loc[0, "balance_to_loan_amount"] == .25 
+    assert out.loc[0, "remaining_months"] == 26
+    assert not out[STATIC_COLUMNS].isna().any().any()
+
+def test_loan_missing_from_loans_table_raises():
+    with pytest.raises(ValueError):
+        add_static_features(one_loan_row("Z"), loans_table("A"))
+
+def test_duplicate_loan_in_loans_table_raises():
+    with pytest.raises(ValueError):
+        add_static_features(one_loan_row("A"), loans_table("A", "A"))

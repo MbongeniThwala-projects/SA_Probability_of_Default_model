@@ -28,7 +28,7 @@ def assign_split(
     ):
         raise ValueError("Splits must be in time order: train, then validation, then test")
 
-    offset = pd.DataOffset(months=int(window_months))
+    offset = pd.DateOffset(months=int(window_months))
     if (
         groups["train"].max() + offset > groups["validation"].min()
         or groups["validation"].max() + offset > groups["test"].min()

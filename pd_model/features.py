@@ -37,11 +37,15 @@ def build_features(labels, performance, lookback_months=config.LOOKBACK_MONTHS):
             "some label rows have no performance history at their observatioin month"
         )
     history = history.drop(columns="has_observation_row")
-    #TODO: join static loan attributes -> age, bureau_score, employment_status...) and add the balance
-    STATIC_COLUMNS = [
-        "product", "province", "age", "employment_status", "monthly_income",
-        "bureau_score", "loan_amount", "term_months", "interest_rate", "payment_to_income"
-    ]
+
+    return labels.merge(
+            history, 
+        )
+
+STATIC_COLUMNS = [
+    "product", "province", "age", "employment_status", "monthly_income",
+    "bureau_score", "loan_amount", "term_months", "interest_rate", "payment_to_income"
+]
 
 def add_static_features(features, loans):
     static = loans[["loan_id"] + STATIC_COLUMNS]
@@ -49,7 +53,7 @@ def add_static_features(features, loans):
     if out[STATIC_COLUMNS].isna().any().any():
         raise ValueError("some loans in the features table are missing from the loans table")
 
-    out["balance_to_loan_amount"] = (out["outstanding_balance"] / out["loan_amount"]).rount(4)
+    out["balance_to_loan_amount"] = (out["outstanding_balance"] / out["loan_amount"]).round(4)
     out["remaining_months"] = out["term_months"] - out["months_on_book"]
     return out
 
