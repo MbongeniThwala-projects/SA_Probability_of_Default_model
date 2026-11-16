@@ -15,8 +15,8 @@ def test_woe_matches_hand_calculation():
     X, y = two_group_frame()
     binner = WoEBinner().fit(X, y, numeric=[], categorical=["group"])
     #smoothed shares for x: bad= 10.5 / 101, good= 90.5 / 101
-    assert binner.woe_['grp']['x'] == pytest.approx(math.log(10.5 / 90.5))
-    assert binner.woe_['grp']['y'] == pytest.approx(math.log(90.5 / 10.5))
+    assert binner.woe_['group']['x'] == pytest.approx(math.log(10.5 / 90.5))
+    assert binner.woe_['group']['y'] == pytest.approx(math.log(90.5 / 10.5))
 
 def test_numeric_woe_rises_with_risk():
     score = np.arange(200)
@@ -32,7 +32,7 @@ def test_unseen_category_gets_neutral_woe():
     binner = WoEBinner().fit(X, y, numeric=[], categorical=['group'])
     out = binner.transform(pd.DataFrame({'group': ['x', 'z']}))['group_woe']
     assert out.iloc[0] != .0
-    assert out.iloc[1] != .0
+    assert out.iloc[1] == .0
 
 def test_signal_has_high_iv_and_noice_has_low_iv():
     rng = np.random.default_rng(0)

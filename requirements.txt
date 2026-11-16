@@ -4,3 +4,4 @@ pyarrow
 duckdb
 pytest
 scikit-learn
+xgboost
