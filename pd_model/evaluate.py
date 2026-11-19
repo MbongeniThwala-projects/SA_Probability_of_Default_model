@@ -24,9 +24,9 @@ def calibration_table(y_true, y_score, bins=10):
     '''Per decile of predicted PD: the average prediction against the actual bad rate'''
     frame = pd.DataFrame({
         "pred": np.asarray(y_score, dtype=float),
-        "bad": np.asarray(y_score, dtype=int)
+        "bad": np.asarray(y_true, dtype=int)
     })
-    frame["decile"] = pd.qcut(frame['pred'], q=bins, labels=False, duplicates='drop')
+    frame["decile"] = pd.qcut(frame['pred'], q=bins, labels=False, duplicates='drop') + 1
     table = frame.groupby('decile').agg(
         rows=('bad', 'size'), mean_pred=("pred", "mean"), actual=('bad', 'mean')
     )
@@ -39,7 +39,7 @@ def psi(expected, actual, bins=10):
     actual = np.asarray(actual, dtype=float)
     edges = np.unique(np.quantile(expected, np.linspace(0, 1, bins + 1)[1:-1]))
     n_bins = len(edges) + 1
-    e = np.bincount(np.searchsorted(edges, expected, side="right"), minlength=n_bins)
+    e = np.bincount(np.searchsorted(edges, expected, side="right"), minlength=n_bins) / len(expected)
     a = np.bincount(np.searchsorted(edges, actual, side='right'), minlength=n_bins) / len(actual)
     e = np.clip(e, 1e-6, None)
     a = np.clip(a, 1e-6, None)

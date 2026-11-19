@@ -1,4 +1,7 @@
 import pandas as pd
+import numpy as np
+
+from scipy.optimize import brentq
 from sklearn.linear_model import LogisticRegression
 from xgboost import XGBClassifier
 
@@ -58,3 +61,14 @@ def predict_xgboost(fitted, table):
     return fitted["model"].predict_proba(_xgb_frame(table, fitted['categories']))[:,1]
 
 #TODO: XGBoost tuning on validation
+def _logit(p):
+    p = np.clip(np.asarray(p, dtype=float), 1e-9, 1 - 1e-9)
+    return np.log(p / (1 - p))
+
+def fit_intercept_shift(predicted, target_rate):
+    '''the constant to add on the log odds scale so the average PD equals target_rate'''
+    z = _logit(predicted)
+    return float(brentq(lambda d: (1 / (1 + np.exp(-(z + d)))).mean() - target_rate, -10, 10))
+
+def apply_intercept_shift(predicted, shift):
+    return 1 / (1 + np.exp(-(_logit(predicted) + shift)))

@@ -5,7 +5,10 @@ import pandas as pd
 
 from pd_model import config
 from pd_model.evaluate import calibration_table, gini, ks_statistic, psi
-from pd_model.models import fit_scorecard, fit_xgboost, predict_scorecard, predict_xgboost
+# from pd_model.models import fit_scorecard, fit_xgboost, predict_scorecard, predict_xgboost
+from pd_model.models import (
+    apply_intercept_shift, fit_intercept_shift, fit_scorecard, fit_xgboost, predict_scorecard, predict_xgboost
+)
 from pd_model.train import TARGET, prepare
 
 def summarise(name, part, predicted):
@@ -41,6 +44,15 @@ def report_part(label, part, train, predictors):
         [summarise(n, unseen, s[unseen_mask]) for n, s in scores.items()]
     ).to_string(index=False))
 
+def report_recalibration(label, part, raw, shift):
+    shifted = apply_intercept_shift(raw, shift)
+    print(f"\n=== {label}: scorecard before and after a level shift of {shift:+.3f} (log-odds) ===")
+    print(pd.DataFrame(
+        [summarise("raw", part, raw), summarise("shifted", part, shifted)]
+    ).to_string(index=False))
+    print(f"\n  ____ {label}: calibration after the shift ______")
+    print(calibration_table(part[TARGET], shifted).to_string())
+
 def main():
     table = prepare(pd.read_parquet(config.MODEL_TABLE_PATH))
     train = table[table["split"] == "train"]
@@ -58,8 +70,25 @@ def main():
 
     report_part("VALIDATION", validation, train, predictors)
 
+    #level shift for the scorecard: fitted onone sets outcomes, applied unchanged elsewhere
+    shift_train = fit_intercept_shift(predictors["scorecard"](train), train[TARGET].mean())
+    shift_validation = fit_intercept_shift(
+        predictors["scorecard"](validation), validation[TARGET].mean()
+    )
+    print(f"\nShift that matches the train rate: {shift_train:+.3f}")
+    print(f"Shift that matches the validation rate: {shift_validation:.3f}")
+    report_recalibration(
+        "VALIDATION (shift fitted on these same rows, so the level matches by design)",
+        validation, predictors["scorecard"](validation), shift_validation
+    )
+
     if "--final" in sys.argv:
         report_part("TEST (final, score once)", table[table["split"] == "test"], train, predictors)
+        test = table[table["split"] == "test"]
+        report_recalibration(
+            "TEST (final; shift fitted on validation)",
+            test, predictors["scorecard"](test), shift_validation
+        )
 
 if __name__ == "__main__":
     main()
