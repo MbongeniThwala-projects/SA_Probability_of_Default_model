@@ -15,6 +15,8 @@ PROCESSED_DIR = ROOT_DIR / "data" / "processed"
 LABELS_PATH = PROCESSED_DIR / "labels.parquet"
 FEATURES_PATH = PROCESSED_DIR / "features.parquet"
 MODEL_TABLE_PATH = PROCESSED_DIR / "model_table.parquet"
+DOCS_DIR = ROOT_DIR / "docs"
+SCORECARD_POINTS_PATH = DOCS_DIR / "scorecard_points.csv"
 
 # Problem definition
 DEFAULT_DPD_THRESHOLD = 90          # DAYS past due that counts as default (basel convent)
