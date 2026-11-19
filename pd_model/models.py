@@ -3,7 +3,7 @@ from sklearn.linear_model import LogisticRegression
 from xgboost import XGBClassifier
 
 from pd_model.train import CATEGORICAL, NUMERIC, TARGET, select_features
-from pd_model.woe import WoEBinner
+from pd_model.WoE import WoEBinner
 
 XGB_FEATURES = NUMERIC + CATEGORICAL
 
@@ -51,10 +51,10 @@ def fit_xgboost(train):
         eval_metric="logloss",
         random_state=42
     )
-    model.fit(_xgb_frame(train, ctegories), train[TARGET])
+    model.fit(_xgb_frame(train, categories), train[TARGET])
     return {"model": model, "categories": categories}
 
 def predict_xgboost(fitted, table):
-    return fitted["model"].predict_proba(_xgb_frame(table, fitted['categories']))[;,1]
+    return fitted["model"].predict_proba(_xgb_frame(table, fitted['categories']))[:,1]
 
 #TODO: XGBoost tuning on validation

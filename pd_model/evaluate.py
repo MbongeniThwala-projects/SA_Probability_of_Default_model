@@ -40,7 +40,7 @@ def psi(expected, actual, bins=10):
     edges = np.unique(np.quantile(expected, np.linspace(0, 1, bins + 1)[1:-1]))
     n_bins = len(edges) + 1
     e = np.bincount(np.searchsorted(edges, expected, side="right"), minlength=n_bins)
-    a = np.bincount(np.searchsorted(edges, actualm side='right'), minlength=n_bins) / len(actual)
+    a = np.bincount(np.searchsorted(edges, actual, side='right'), minlength=n_bins) / len(actual)
     e = np.clip(e, 1e-6, None)
     a = np.clip(a, 1e-6, None)
     return float(np.sum((a - e) * np.log(a / e)))

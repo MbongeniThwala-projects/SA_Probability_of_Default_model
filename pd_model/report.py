@@ -4,9 +4,9 @@ import sys
 import pandas as pd
 
 from pd_model import config
-from pd_model.evaulate import calibration_table, gini, ks_statistic, psi
+from pd_model.evaluate import calibration_table, gini, ks_statistic, psi
 from pd_model.models import fit_scorecard, fit_xgboost, predict_scorecard, predict_xgboost
-from pd.model.train import TARGET, prepare
+from pd_model.train import TARGET, prepare
 
 def summarise(name, part, predicted):
     return{
@@ -49,8 +49,8 @@ def main():
     scorecard = fit_scorecard(train)
     xgb = fit_xgboost(train)
     predictors = {
-        "scorecard": lamda part: predict_scorecard(scorecard, part),
-        "xgboost": lamda part: predict_xgboost(xgb, part)
+        "scorecard": lambda part: predict_scorecard(scorecard, part),
+        "xgboost": lambda part: predict_xgboost(xgb, part)
     }
 
     print("Scorecard fratures kept:", scorecard["features"])
